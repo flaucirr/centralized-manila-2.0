@@ -1,193 +1,78 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios'
-import {Link} from "react-router-dom"
+import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+ 
+function Login() {
+    const navigate = useNavigate(); // Move this line inside the function
 
-import Sidebar from '../partials/Sidebar';
-import Header from '../partials/Header';
-import Flatpickr from 'react-flatpickr';
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [loginSuccess, setLoginSuccess] = useState(""); // New state to track successful login
 
-import 'flatpickr/dist/themes/airbnb.css';
-
-const Profile =()=>{
-
-  const [userPersonal, setUserPersonal]=useState([])
-  // const id = 'RL1741';
-     
-    useEffect(()=>{
-        const fetchUserPersonal= async()=>{
-            try{
-                const res= await axios.get("http://localhost:8800/profile/")
-                setUserPersonal(res.data)
-            }catch(err){
-                console.log(err)
-            }
-        }
-        fetchUserPersonal()
-    },[])
-
-
-
-    // const handleDelete= async(id)=>{
-    //     try{
-    //         await axios.delete("http://localhost:8800/furns/" +id)
-    //         window.location.reload()
-    //     }catch(err){
-    //         console.log(err)
-    //     }
-    // }
-
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [birthdate, setBirthdate] = useState(new Date());
-
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post("http://localhost:8800/login", { mobile_no: username, user_pass: password });
+      if (response.data.message === "Authentication successful") {
+        setLoginSuccess("Authentication successful");
+        navigate("/dashboard"); // Move this line inside the if block
+      } else {
+        setLoginError("Authentication failed"); // Set error message for unsuccessful login
+      }
+    } catch (error) {
+      console.error(error);
+      setLoginError(error.response.data.message); // Set error message from the server response
+    }
+  };
+    
   return (
-    <div className="flex h-screen overflow-hidden dark:bg-[#212121]">
+    <div className='bg-white'>
+        <section className="h-screen flex flex-col md:flex-row justify-center space-y-10 items-center">
+        <div className="md:w-1/3 max-w-sm mx-16">
+            <img
+            src="https://tecdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
+            alt="Sample image" />
+        </div>
 
-      {/* Sidebar */}
-      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-
-      {/* Content area */}
-      <div className="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-
-        {/*  Site header */}
-        <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-
-        <main>
-          <div className="flex flex-col col-span-full sm:col-span-6 xl:col-span-4 bg-white dark:bg-[#2b2b2b] dark:border-[#3d3d3d] shadow-lg rounded-sm border border-slate-200 mx-4 my-4">
-            <div className="px-5 py-5">
-                 
-            {userPersonal.map((user)=>(
-            <form>
-              <h1 className='mb-16 text-center font-medium'>Personal Information</h1>
-            
-              <div class="grid md:grid-cols-1 md:gap-6">
-                <div class="relative z-0 w-full mb-6 group">
-                  <input value={user.user_id} type="text" name="user_id" id="user_id" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " readOnly/>
-                  <label for="user_id" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">User ID</label>
-                </div>
-              </div>
-              
-            
-              <div class="grid md:grid-cols-3 md:gap-6">
-                <div class="relative z-0 w-full mb-6 group">
-                  <input value={user.f_name} type="text" name="first_name" id="first_name" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
-                  <label for="first_name" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">First Name</label>
-                </div>
-                <div class="relative z-0 w-full mb-6 group">
-                  <input value={user.m_name} type="text" name="middle_name" id="middle_name" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
-                  <label for="middle_name" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Middle Name</label>
-                </div>
-                <div class="relative z-0 w-full mb-6 group">
-                  <input value={user.l_name} type="text" name="last_name" id="last_name" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
-                  <label for="last_name" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Last Name</label>
-                </div>
-              </div>
-
-              <div class="grid md:grid-cols-4 md:gap-6">
-                <div class="relative z-0 w-full mb-6 group">
-                  <input value={user.suffix} type="text" name="suffix" id="suffix" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " />
-                  <label for="suffix" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Suffix</label>
-                </div>
-                <div class="relative z-0 w-full mb-6 group">
-                  <select value={user.sex_id} name="sex" id="sex" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" required>
-                    <option value="0" disabled selected>Select Sex</option>
-                    <option value="1" className='dark:bg-[#3d3d3d]'>Male</option>
-                    <option value="2"className='dark:bg-[#3d3d3d]'>Female</option>
-                  </select>
-                  <label for="sex" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Sex</label>
-                </div>
-                
-                {/* Row 3 - Birthdate input */}
-                <div className="relative z-0 w-full mb-6 group ">
-                  <Flatpickr
-                    value={user.b_date}
-                    onChange={(date) => setBirthdate(date)}
-                    options={{
-                      dateFormat: 'Y-m-d',
-                      altInput: true,
-                      altFormat: 'F j, Y',
-                      altInputClass: 'block py-2.5 px-0 w-full bg-transparent text-sm text-gray-900 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer',
-                      appendTo: document.body, // This is important for custom styling
-                      onOpen: function (selectedDates, dateStr, instance) {
-                        // Check if dark mode is active and target the month dropdown
-                        if (document.documentElement.classList.contains('dark')) {
-                          const monthDropdown = instance.calendarContainer.querySelector('.flatpickr-monthDropdown-months');
-                          if (monthDropdown) {
-                            monthDropdown.style.backgroundColor = '#212121'; // Set the desired background color for dark mode
-                          }
-                        }
-                      },
-                      onClose: function (selectedDates, dateStr, instance) {
-                        // Reset the background color when the date picker is closed
-                        const monthDropdown = instance.calendarContainer.querySelector('.flatpickr-monthDropdown-months');
-                        if (monthDropdown) {
-                          monthDropdown.style.backgroundColor = ''; // Reset the background color
-                        }
-                      },
-                    }}
-                    required
-                  />
-                  <label
-                    for="birthdate"
-                    className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-                  >
-                    Birthdate
-                  </label>
+        <div className="md:w-1/3 max-w-sm">
+        <form onSubmit={handleSubmit}>
+                <h1 className='text-center mb-7 text-black'>Login</h1>
+                <input className="text-sm w-full px-4 py-2 border border-solid border-gray-300 rounded" type="text" placeholder="Mobile Number"  value={username}
+              onChange={(e) => setUsername(e.target.value)} />
+                <input className="text-sm w-full px-4 py-2 border border-solid border-gray-300 rounded mt-4" type="password" placeholder="Password" value={password}
+              onChange={(e) => setPassword(e.target.value)} />
+                <div className="mt-4 flex justify-between font-semibold text-sm">
+                    <label className="flex text-slate-500 hover:text-slate-600 cursor-pointer">
+                        <input className="mr-1" type="checkbox" />
+                        <span>Remember Me</span>
+                    </label>
+                    <a className="text-blue-600 hover:text-blue-700 hover:underline hover:underline-offset-4" href="#">Forgot Password?</a>
                 </div>
 
-                {/* Row 3 - Birth Place */}
-                <div class="relative z-0 w-full mb-6 group">
-                  <input value={user.b_place} type="text" name="place_of_birth" id="place_of_birth" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
-                  <label for="place_of_birth" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Place of Birth</label>
+                <div className="text-center md:text-left">
+                    <button className="mt-4 bg-blue-600 hover:bg-blue-700 px-4 py-2 text-white uppercase rounded text-xs tracking-wider" type="submit">Login</button>
+                    {loginError ? (
+                <p className="text-red-600">{loginError}</p>
+                ) : null}
+                {loginSuccess ? (
+                <p className="text-green-600">{loginSuccess}</p>
+                ) : null}
                 </div>
-              </div>
-              
-              {/* Row 4 - Email */}
-              <div class="grid grid-cols-1">
-              <div class="relative z-0 w-full mb-6 group">
-                <input type="email" name="floating_email" id="floating_email" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
-                <label for="floating_email" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Email address</label>
-              </div>
-              </div>
-              
-              {/* Row 5 - Civil Status */}
-              <div class="grid md:grid-cols-3 md:gap-6">
-                <div class="relative z-0 w-full mb-6 group">
-                  <select value={user.cvl_id} name="civil_status" id="civil_status" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" required>
-                    <option value="0" disabled selected>Select Civil Status</option>
-                    <option value="1" className='dark:bg-[#3d3d3d]'>Single</option>
-                    <option value="2" className='dark:bg-[#3d3d3d]'>Married</option>
-                    <option value="3" className='dark:bg-[#3d3d3d]'>Divorced</option>
-                    <option value="4" className='dark:bg-[#3d3d3d]'>Widowed</option>
-                  </select>
-                  <label for="civil_status" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Civil Status</label>
-                </div>
-
-                {/* Row 5 - Citizenship */}
-                <div class="relative z-0 w-full mb-6 group">
-                  <input value={user.czn_id} type="text" name="citizenship" id="citizenship" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
-                  <label for="citizenship" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Citizenship</label>
-                </div>
-
-                {/* Row 5 - Residency Status */}
-                <div class="relative z-0 w-full mb-6 group">
-                  <input value={user.res_id} type="text" name="residency_status" id="residency_status" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
-                  <label for="residency_status" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Residency Status</label>
-                </div>
-              </div>
-              
-              <div class="flex flex-col items-center md:flex-row md:justify-end mt-7">
-                  <button type="submit" class="text-blue-500 hover:text-white border border-blue-500 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-normal rounded-full text-sm px-10 py-2.5 text-center mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800">Save Changes</button>
-              </div>
             </form>
-            ))}
+            
 
+            <div className="my-5 flex items-center before:mt-0.5 before:flex-1 before:border-t before:border-neutral-300 after:mt-0.5 after:flex-1 after:border-t after:border-neutral-300">
+            <p className="mx-4 mb-0 text-center font-semibold text-slate-500">Or</p>
             </div>
-          </div>
-        </main>
-
-      </div>
+            <div className="mt-4 font-semibold text-sm text-slate-500 text-center md:text-left">
+                Don't have an account? <a className="text-red-600 hover:underline hover:underline-offset-4" href="../register">Register</a>
+            </div>
+        </div>
+        </section>
     </div>
+    
   );
 }
-
-export default Profile;
+ 
+export default Login;

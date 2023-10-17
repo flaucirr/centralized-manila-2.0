@@ -1,112 +1,81 @@
 import express from "express";
 import mysql from "mysql";
 import cors from 'cors';
-import bodyParser from "body-parser";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 
 const app = express();
+app.use(express.json());
+app.use(cors());
 
+// Create a MySQL connection
 const conn2 = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "lagaras123",
-  database: "clientdatabase"
+  password: "adb011812adb",
+  database: "clientdatabase",
 });
 
-app.use(express.json());
-app.use(cors());
-app.use(bodyParser.json());
-
-app.get("/", (req, res) => {
-  res.json("hello, this is the backend");
+conn2.connect((err) => {
+  if (err) {
+    console.error("Error connecting to the database: " + err);
+    return;
+  }
+  console.log("Connected to the database");
 });
 
-app.get("/profile", (req, res) => {
-  const userId = 'RL1741'; // Replace with the actual user_id you want to query.
-  const query = "SELECT * FROM user_personal WHERE user_id = ?";
+// Define a route for user authentication
+app.post("/login", (req, res) => {
+  const { mobile_no, user_pass } = req.body;
 
-  conn2.query(query, [userId], (err, data) => {
+  // SQL query to check user credentials
+  const sql = "SELECT * FROM user_auth WHERE mobile_no = ? AND user_pass = ?";
+
+  conn2.query(sql, [mobile_no, user_pass], (err, results) => {
     if (err) {
       console.error(err);
-      res.status(500).send('Error retrieving data');
+      return res.status(500).json({ message: "Error occurred while authenticating." });
+    }
+
+    if (results.length === 1) {
+      // Authentication successful
+      return res.json({ message: "Authentication successful" });
     } else {
-      res.json(data);
-    }
-  });
-});
-
-app.get("/auth", (req, res) => {
-  const query = "SELECT * FROM user_auth";
-
-  conn2.query(query, (err, data) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send('Error retrieving data');
-    } else {
-      res.json(data);
+      // Authentication failed
+      return res.status(401).json({ message: "Authentication failed" });
     }
   });
 });
 
 
-app.post("/auth", async (req, res) => {
-  const { mobileNo, userPass } = req.body;
-  console.log("Received mobileNo:", mobileNo);
-  console.log("Received userPass:", userPass);
+app.get("/", (req, res)=>{
+    res.json("hello, this is the backend")
+})
 
-  const query = "SELECT * FROM user_auth WHERE mobileNo = ?";
-  
-  conn2.query(query, [mobileNo], async (err, results) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send('Error retrieving data');
-      return;
-    }
+app.get("/profile", (req, res)=>{
+    const q= "SELECT * FROM user_personal WHERE user_id = 'RL1741'"
+    conn2.query(q,(err, data)=>{
+            if(err) return res.json(err)
+            return res.json(data)
+    })
+})
 
-    if (results.length === 0) {
-      res.status(401).json({ message: "User not found" });
-      return;
-    }
 
-    const user = results[0];
+  app.get('/profile/:user_id', (req, res) => {
+    const user_id = req.params.user_id;
 
-    // Check if the password matches
-    if (!bcrypt.compareSync(userPass, user.userPass)) {
-      res.status(401).json({ message: "Invalid password" });
-      return;
-    }
+    // SQL query to fetch the user's profile data
+    const sql = "SELECT * FROM user_personal WHERE user_id = ?";
 
-    // Create and return a JSON Web Token (JWT) for the user
-    const token = jwt.sign({ userId: user.user_id }, "12345");
-    res.json({ token });
+    conn2.query(sql, [user_id], (err, result) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send('Error retrieving data');
+      } else {
+        res.json(result);
+      }
+    });
   });
-});
-
-app.get('/profile/:id', (req, res) => {
-  const userId = req.params.id; // Get the user_id from the URL parameter.
-  const query = "SELECT * FROM user_personal WHERE user_id = ?";
-
-  conn2.query(query, [userId], (err, result) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send('Error retrieving data');
-    } else {
-      res.json(result);
-    }
-  });
-});
-
-app.listen(8800, () => {
-  console.log("connected to backend");
-});
-
-      //   conn2.query(q,[...values, userID], (err, data)=>{
-      //     if(err) return res.json(err)
-      //     return res.json("item has been successfully updated")
-      // })
-  
       
+
 
 
 // app.post("/furns", (req, res)=>{
@@ -137,7 +106,18 @@ app.listen(8800, () => {
 // })
 
 
-
+// app.put("/furns/:id", (req, res)=>{
+//     const furnId= req.params.id;
+//     const q= "UPDATE furnitures SET `prod_name`=?, `prod_desc`=?, `prod_image`=?, `prod_price`=? WHERE id=?"
+//     const values= [
+            
+//         req.body.prod_name,
+//         req.body.prod_desc,
+//         req.body.prod_image,
+//         req.body.prod_price
+        
+        
+//     ];
 
 
 //     db.query(q,[...values, furnId], (err, data)=>{
@@ -148,3 +128,6 @@ app.listen(8800, () => {
 
 
 
+app.listen(8800, ()=>{
+    console.log("connected to backend")
+})

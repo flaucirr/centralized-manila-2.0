@@ -22,7 +22,8 @@ const handleClick= async e=>{
     try{
         await axios.post("http://localhost:8800/register", userReg)
         console.log('Successful Register')
-        navigate("/dashboard")
+        alert("Successful");
+        navigate("/register")
     }catch(err){
         console.log(err)
     }

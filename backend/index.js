@@ -4,6 +4,7 @@ import cors from 'cors';
 import bodyParser from "body-parser";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import session from "express-session";
 
 const app = express();
 
@@ -14,6 +15,14 @@ const conn2 = mysql.createConnection({
   database: "clientdatabase"
 });
 
+conn2.connect((err) => {
+  if (err) {
+    console.error("Error connecting to the database: " + err);
+    return;
+  }
+  console.log("Connected to the database");
+});
+
 app.use(express.json());
 app.use(cors());
 app.use(bodyParser.json());
@@ -21,6 +30,65 @@ app.use(bodyParser.json());
 app.get("/", (req, res) => {
   res.json("hello, this is the backend");
 });
+
+
+app.use(session({
+  secret: "ABC123",
+  resave: false,
+  saveUninitialized: true,
+}));
+
+
+
+app.post("/login", (req, res) => {
+  const { mobile_no, user_pass } = req.body;
+  const sql = "SELECT user_id FROM user_auth WHERE mobile_no = ? AND user_pass = ?";
+
+  conn2.query(sql, [mobile_no, user_pass], (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: "Error occurred while authenticating." });
+    }
+
+    if (results.length === 1) {
+      const user_id = results[0].user_id;
+
+      // Store user_id in the session
+      req.session.user_id = user_id;
+      
+
+      return res.json({ message: "Authentication successful" });
+    } else {
+      return res.status(401).json({ message: "Authentication failed" });
+    }
+  });
+});
+
+
+// ITO YUNG SESSION HINDI KO MAGAWA
+
+// app.get("/profile", (req, res) => {
+//   // Get the user_id from the session
+//   const userId = req.session.user_id;
+
+//   if (!userId) {
+//     return res.status(401).json({ message: "User not authenticated" });
+//   }
+
+//   const query = "SELECT * FROM user_personal WHERE user_id = ?";
+
+//   conn2.query(query, [userId], (err, data) => {
+//     if (err) {
+//       console.error(err);
+//       res.status(500).send('Error retrieving data');
+//     } else {
+//       res.json(data);
+//     }
+//   });
+// });
+
+
+// ITO YUNG UNA, YUNG SA AKIN ID LANG
 
 app.get("/profile", (req, res) => {
   const userId = 'RL1741'; // Replace with the actual user_id you want to query.
@@ -36,66 +104,66 @@ app.get("/profile", (req, res) => {
   });
 });
 
-app.get("/auth", (req, res) => {
-  const query = "SELECT * FROM user_auth";
+// app.get("/auth", (req, res) => {
+//   const query = "SELECT * FROM user_auth";
 
-  conn2.query(query, (err, data) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send('Error retrieving data');
-    } else {
-      res.json(data);
-    }
-  });
-});
+//   conn2.query(query, (err, data) => {
+//     if (err) {
+//       console.error(err);
+//       res.status(500).send('Error retrieving data');
+//     } else {
+//       res.json(data);
+//     }
+//   });
+// });
 
 
-app.post("/auth", async (req, res) => {
-  const { mobileNo, userPass } = req.body;
-  console.log("Received mobileNo:", mobileNo);
-  console.log("Received userPass:", userPass);
+// app.post("/auth", async (req, res) => {
+//   const { mobileNo, userPass } = req.body;
+//   console.log("Received mobileNo:", mobileNo);
+//   console.log("Received userPass:", userPass);
 
-  const query = "SELECT * FROM user_auth WHERE mobileNo = ?";
+//   const query = "SELECT * FROM user_auth WHERE mobileNo = ?";
   
-  conn2.query(query, [mobileNo], async (err, results) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send('Error retrieving data');
-      return;
-    }
+//   conn2.query(query, [mobileNo], async (err, results) => {
+//     if (err) {
+//       console.error(err);
+//       res.status(500).send('Error retrieving data');
+//       return;
+//     }
 
-    if (results.length === 0) {
-      res.status(401).json({ message: "User not found" });
-      return;
-    }
+//     if (results.length === 0) {
+//       res.status(401).json({ message: "User not found" });
+//       return;
+//     }
 
-    const user = results[0];
+//     const user = results[0];
 
-    // Check if the password matches
-    if (!bcrypt.compareSync(userPass, user.userPass)) {
-      res.status(401).json({ message: "Invalid password" });
-      return;
-    }
+//     // Check if the password matches
+//     if (!bcrypt.compareSync(userPass, user.userPass)) {
+//       res.status(401).json({ message: "Invalid password" });
+//       return;
+//     }
 
-    // Create and return a JSON Web Token (JWT) for the user
-    const token = jwt.sign({ userId: user.user_id }, "12345");
-    res.json({ token });
-  });
-});
+//     // Create and return a JSON Web Token (JWT) for the user
+//     const token = jwt.sign({ userId: user.user_id }, "12345");
+//     res.json({ token });
+//   });
+// });
 
-app.get('/profile/:id', (req, res) => {
-  const userId = req.params.id; // Get the user_id from the URL parameter.
-  const query = "SELECT * FROM user_personal WHERE user_id = ?";
+// app.get('/profile/:id', (req, res) => {
+//   const userId = req.params.id; // Get the user_id from the URL parameter.
+//   const query = "SELECT * FROM user_personal WHERE user_id = ?";
 
-  conn2.query(query, [userId], (err, result) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send('Error retrieving data');
-    } else {
-      res.json(result);
-    }
-  });
-});
+//   conn2.query(query, [userId], (err, result) => {
+//     if (err) {
+//       console.error(err);
+//       res.status(500).send('Error retrieving data');
+//     } else {
+//       res.json(result);
+//     }
+//   });
+// });
 
 app.listen(8800, () => {
   console.log("connected to backend");

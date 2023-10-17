@@ -16,6 +16,7 @@ import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import News from './pages/News';
 import RPTaxPayment from './pages/RPTaxPayment';
+import Testing from './components/Testing';
 
 function App() {
 
@@ -36,6 +37,7 @@ function App() {
         <Route exact path="/profile" element={<Profile />} />
         <Route exact path="/news" element={<News />} />
         <Route exact path="/rptaxpayment" element={<RPTaxPayment />} />
+        <Route exact path="/testing" element={<Testing />} />
       </Routes>
     </>
   );

@@ -3,40 +3,16 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 function Login() {
-<<<<<<< HEAD
-  const navigate = useNavigate();
-=======
   const navigate = useNavigate(); // Move this line inside the function
->>>>>>> 3d6055eb33c51bc384b981032b3854c9f1aee2f0
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
-<<<<<<< HEAD
-=======
   const [loginSuccess, setLoginSuccess] = useState(""); // New state to track successful login
->>>>>>> 3d6055eb33c51bc384b981032b3854c9f1aee2f0
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-<<<<<<< HEAD
-      const response = await axios.post("http://localhost:8800/login", {
-        mobile_no: username,
-        user_pass: password,
-      });
-      if (response.data.message === "Authentication successful") {
-        // Authentication successful, navigate to the dashboard
-        navigate("/dashboard");
-      } else {
-        // Authentication failed, show an error message
-        setLoginError("Authentication failed");
-      }
-    } catch (error) {
-      // Handle any network or server errors
-      console.error(error);
-      setLoginError("Authentication failed. Please check your credentials.");
-=======
       const response = await axios.post("http://localhost:8800/login", { mobile_no: username, user_pass: password });
       if (response.data.message === "Authentication successful") {
         setLoginSuccess("Authentication successful");
@@ -47,16 +23,11 @@ function Login() {
     } catch (error) {
       console.error(error);
       setLoginError(error.response.data.message); // Set error message from the server response
->>>>>>> 3d6055eb33c51bc384b981032b3854c9f1aee2f0
     }
   };
 
   return (
-<<<<<<< HEAD
-    <div className="bg-white">
-=======
     <div className='bg-white'>
->>>>>>> 3d6055eb33c51bc384b981032b3854c9f1aee2f0
       <section className="h-screen flex flex-col md:flex-row justify-center space-y-10 items-center">
         <div className="md:w-1/3 max-w-sm mx-16">
           <img
@@ -128,8 +99,4 @@ function Login() {
   );
 }
 
-<<<<<<< HEAD
 export default Login;
-=======
-export default Login;
->>>>>>> 3d6055eb33c51bc384b981032b3854c9f1aee2f0
